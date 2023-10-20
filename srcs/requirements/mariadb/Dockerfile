@@ -10,14 +10,17 @@ RUN     apt-get update \
 
 FROM    installation_${CONTAINER_NANE}:${CODE_VERSION}
 
-RUN     mkdir -p /var/run/mysqld \
-    &&  chown -R mysql:mysql /var/run/mysqld \
-    &&  chmod 777 /var/run/mysqld
+COPY	conf/50-server.cnf	/etc/mysql/mariadb.conf.d/50-server.cnf
+
+RUN     mkdir -p /var/run/mysqld /var/lib/mysqld \
+    &&  chown -R mysql:mysql /var/run/mysqld /var/lib/mysql \
+    &&  chmod 755 /var/run/mysqld /var/lib/mysql
 
 EXPOSE 3306
 
-COPY ./tools/create_db.sh /usr/local/bin/
-COPY ./conf/wordpress.sql /usr/local/bin/
+COPY	./tools/create_db.sh /usr/local/bin/
+RUN	chmod +x /usr/local/bin/create_db.sh
+
 ENTRYPOINT ["create_db.sh"]
 
 CMD ["mysqld", "--bind-address=0.0.0.0"]
