@@ -2,15 +2,14 @@
 
 set -eux
 
-
-#service mysqld start;
+service mysql start;
 
 if [ -d "/var/lib/mysql/$MYSQL_DATABASE" ]
 then 
 	echo "Database already exists"
 else
 
-mysql_install_db;
+#mysql_install_db;
 #service mysqld start;
 
 mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"

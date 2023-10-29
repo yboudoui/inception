@@ -2,6 +2,7 @@
 set -eux
 
 LOCAL_PATH=/var/www/html/wordpress
+#LOCAL_PATH=/var/www/wordpress
 cd $LOCAL_PATH
 
 if [ ! -f wp-config.php ]; then
