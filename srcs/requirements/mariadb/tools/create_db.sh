@@ -1,6 +1,17 @@
 #!/bin/sh
 
-service mysql start;
+set -eux
+
+
+#service mysqld start;
+
+if [ -d "/var/lib/mysql/$MYSQL_DATABASE" ]
+then 
+	echo "Database already exists"
+else
+
+mysql_install_db;
+#service mysqld start;
 
 mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
 mysql -e "CREATE USER IF NOT EXISTS \`${MYSQL_USER}\`@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';"
@@ -9,6 +20,8 @@ mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
 mysql -e "FLUSH PRIVILEGES;"
 
 mysqladmin -u root -p${MYSQL_ROOT_PASSWORD} shutdown
-exec mysqld_safe
 
+fi
+
+exec mysqld_safe
 echo "MariaDB database and user were created successfully! "
