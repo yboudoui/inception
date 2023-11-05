@@ -2,27 +2,36 @@ version: '3.8'
 services:
 
   mariadb:
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     container_name: mariadb
     build: requirements/mariadb
     image: mariadb:inception
-    env_file: .env
     volumes:
-      - /home/${MYSQL_USER}/data/mysql:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - docker_network
     restart: always
 
   wordpress:
+    environment: 
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOSTNAME=${MYSQL_HOSTNAME}
+      - LOGIN=${LOGIN}
     container_name: wordpress
     build: requirements/wordpress
     image: wordpress:inception
-    env_file: .env
     depends_on: 
       - mariadb
     networks:
       - docker_network
     volumes:
-      - /home/${MYSQL_USER}/data/wordpress:/var/www/html/wordpress
+      - wordpress_data:/var/www/html/wordpress
     restart: always
 
   nginx:
@@ -36,8 +45,23 @@ services:
     ports:
       - "443:443"
     volumes:
-      - /home/${MYSQL_USER}/data/wordpress:/var/www/html/wordpress
+      - wordpress_data:/var/www/html/wordpress
     restart: always
 
 networks:
   docker_network:
+
+volumes:
+  db_data: 
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/${LOGIN}/data/mysql
+      o: bind
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/${LOGIN}/data/wordpress
+      o: bind
+

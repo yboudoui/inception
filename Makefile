@@ -1,30 +1,48 @@
-#!make
-include srcs/.env
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: llescure <llescure@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/06/03 10:40:53 by llescure          #+#    #+#              #
+#    Updated: 2021/08/02 10:47:36 by llescure         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-COMPOSE_FILE			=	./srcs/docker-compose.yml
-DATA_DIR			=	/home/$(MYSQL_USER)/data
+COMPOSE_FILE=./srcs/docker-compose.yml
 
-WORDPRESS_DIR			=	$(DATA_DIR)/wordpress
-MYSQL_DIR			=	$(DATA_DIR)/mysql
+all: run
 
-DIRS				=	$(WORDPRESS_DIR) $(MYSQL_DIR)
-
-CMD_DOCKER_COMPOSE		=	docker compose
-CMD_DOCKER_COMPOSE_FILE		=	$(CMD_DOCKER_COMPOSE) -f $(COMPOSE_FILE)
-
-all: build up
-
-build:
-	sudo mkdir -p $(DIRS)
-	$(CMD_DOCKER_COMPOSE_FILE) build
+run: 
+	@sudo mkdir -p /home/llescure/data/wordpress
+	@sudo mkdir -p /home/llescure/data/mysql
+	@docker-compose -f $(COMPOSE_FILE) up --build
 
 up:
-	$(CMD_DOCKER_COMPOSE_FILE) up
+	@sudo mkdir -p /home/llescure/data/wordpress
+	@sudo mkdir -p /home/llescure/data/mysql
+	@docker-compose -f $(COMPOSE_FILE) up -d --build
 
-down:
-	$(CMD_DOCKER_COMPOSE_FILE) down
+debug:
+	@sudo mkdir -p /home/llescure/data/wordpress
+	@sudo mkdir -p /home/llescure/data/mysql
+	@docker-compose -f $(COMPOSE_FILE) --verbose up
 
-clean: down
-	@sudo rm -rf $(DIRS)
+list:	
+	 docker ps -a
 
-.PHONY: build up down clean
+list_volumes:
+	docker volume ls
+
+clean: 	
+	@docker-compose -f $(COMPOSE_FILE) down
+	@-docker stop `docker ps -qa`
+	@-docker rm `docker ps -qa`
+	@-docker rmi -f `docker images -qa`
+	@-docker volume rm `docker volume ls -q`
+	@-docker network rm `docker network ls -q`
+	@sudo rm -rf /home/llescure/data/wordpress
+	@sudo rm -rf /home/llescure/data/mysql
+
+.PHONY: run up debug list list_volumes clean

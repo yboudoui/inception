@@ -1,26 +1,36 @@
 #!/bin/sh
 
-set -eux
+mysql_install_db
 
-service mysql start;
+/etc/init.d/mysql start
 
 if [ -d "/var/lib/mysql/$MYSQL_DATABASE" ]
 then 
+
 	echo "Database already exists"
 else
 
-#mysql_install_db;
-#service mysqld start;
+# Set root option so that connexion without root password is not possible
 
-mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
-mysql -e "CREATE USER IF NOT EXISTS \`${MYSQL_USER}\`@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';"
-mysql -e "GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USER}\`@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-mysql -e "FLUSH PRIVILEGES;"
+mysql_secure_installation <<_EOF_
 
-mysqladmin -u root -p${MYSQL_ROOT_PASSWORD} shutdown
+Y
+root4life
+root4life
+Y
+n
+Y
+Y
+_EOF_
+
+echo "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'; FLUSH PRIVILEGES;" | mysql -uroot
+
+echo "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE; GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; FLUSH PRIVILEGES;" | mysql -uroot
+
+#mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /usr/local/bin/wordpress.sql
 
 fi
 
-exec mysqld_safe
-echo "MariaDB database and user were created successfully! "
+/etc/init.d/mysql stop
+
+exec "$@"

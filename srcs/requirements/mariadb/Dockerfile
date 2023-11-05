@@ -1,26 +1,16 @@
-ARG CONTAINER_NANE=mariadb
-ARG CODE_VERSION=11
-FROM debian:${CODE_VERSION} AS mariadb_installation
+FROM debian:buster
 
-RUN apt-get update -y \
-    &&  apt-get -y install \
-            mariadb-server-10.3 \
-            mariadb-client \
-    &&  rm -rf /var/lib/apt/lists/*
-
-FROM mariadb_installation
-
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
-
-RUN mkdir -p /var/run/mysqld /var/lib/mysqld \
-    &&  chown -R mysql:mysql /var/run/mysqld /var/lib/mysql \
-    &&  chmod 755 /var/run/mysqld /var/lib/mysql
+RUN apt-get update && apt-get -y install mariadb-server mariadb-client \
+&& rm -rf /var/lib/apt/lists/* \
+&& mkdir -p /var/run/mysqld \
+&& chown -R mysql:mysql /var/run/mysqld \
+&& chmod 777 /var/run/mysqld
 
 EXPOSE 3306
 
-COPY ./tools/create_db.sh ./
-RUN chmod +x ./create_db.sh
+COPY ./tools/create_db.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/create_db.sh
+COPY ./conf/wordpress.sql /usr/local/bin/
+ENTRYPOINT ["create_db.sh"]
 
-ENTRYPOINT ["bash", "create_db.sh"]
-
-#CMD ["mysqld", "--bind-address=0.0.0.0"]
+CMD ["mysqld", "--bind-address=0.0.0.0"]
