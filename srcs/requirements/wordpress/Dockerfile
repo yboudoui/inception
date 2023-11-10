@@ -22,13 +22,9 @@ RUN wget \
 
 FROM wordpress_cli AS wordpress_archive
 
-RUN wget https://wordpress.org/wordpress-6.1.1.tar.gz -P /var/www/html
-RUN cd /var/www/html \
-	&& tar -xzf /var/www/html/wordpress-6.1.1.tar.gz \
-	&& rm /var/www/html/wordpress-6.1.1.tar.gz
 
-RUN mkdir -p /var/www/ \
-; chown -R www-data:www-data /var/www/ \
+RUN mkdir -p /var/www/html \
+&& chown -R www-data:www-data /var/www/ \
 && chmod -R 755 /var/www/
 
 FROM wordpress_archive AS wordpress_import_files

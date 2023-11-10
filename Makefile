@@ -15,7 +15,7 @@ CMD_DOCKER_COMPOSE_FILE		=	$(CMD_DOCKER_COMPOSE) -f $(COMPOSE_FILE)
 all: build up
 
 build:
-	sudo mkdir -p $(DIRS)
+	mkdir -p $(DIRS)
 	$(CMD_DOCKER_COMPOSE_FILE) build
 
 up:
@@ -25,6 +25,6 @@ down:
 	$(CMD_DOCKER_COMPOSE_FILE) down
 
 clean: down
-	@sudo rm -rf $(DIRS)
+	@rm -rf $(DIRS)
 
 .PHONY: build up down clean

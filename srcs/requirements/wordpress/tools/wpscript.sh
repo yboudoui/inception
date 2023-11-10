@@ -1,13 +1,25 @@
 #!/bin/bash
+
+LOCAL_PATH=/var/www/html
+cd $LOCAL_PATH
+
 set -eux
 
-LOCAL_PATH=/var/www/html/wordpress
-#LOCAL_PATH=/var/www/wordpress
-cd $LOCAL_PATH
+ls -la
+if ls -A1q wordpress | grep -q .
+then
+	echo "Wordpress is allready downloaded"
+else
+#if [ ! -d ./wordpress ]; then
+wp core download	--allow-root \
+			--path=${LOCAL_PATH}/wordpress ;
+fi
+
+#ls -la wordpress
 
 if [ ! -f wp-config.php ]; then
 wp config create	--allow-root \
-			--path=$LOCAL_PATH \
+			--path=${LOCAL_PATH}/wordpress \
 			--dbname=${MYSQL_DATABASE} \
 			--dbuser=${MYSQL_USER} \
 			--dbpass=${MYSQL_PASSWORD} \
@@ -15,11 +27,7 @@ wp config create	--allow-root \
 			--url=https://${DOMAIN_NAME};
 fi
 
-if ! wp core is-installed --allow-root;
-then
-
-wp core download	--allow-root;
-
+if ! wp core is-installed --allow-root; then
 wp core install		--allow-root \
 			--url=https://${DOMAIN_NAME} \
 			--title=${SITE_TITLE} \
