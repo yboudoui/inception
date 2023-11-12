@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eux
+#set -eux
 
 if [ -d "/var/lib/mysql/${MYSQL_DATABASE}" ]
 then 

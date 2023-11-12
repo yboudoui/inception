@@ -1,6 +1,4 @@
-ARG CONTAINER_NANE=wordpress
-ARG CODE_VERSION=11
-FROM debian:${CODE_VERSION} AS wordpress_installation
+FROM debian:buster AS wordpress_installation
 
 RUN apt-get update -y \
 &&	apt-get install -y \
@@ -22,10 +20,9 @@ RUN wget \
 
 FROM wordpress_cli AS wordpress_archive
 
-
-RUN mkdir -p /var/www/html \
-&& chown -R www-data:www-data /var/www/ \
-&& chmod -R 755 /var/www/
+RUN mkdir -p /var/www/html/wordpress \
+&& chown -R www-data:www-data /var/www/* \
+&& chmod -R 755 /var/www/*
 
 FROM wordpress_archive AS wordpress_import_files
 
