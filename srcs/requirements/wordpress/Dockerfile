@@ -1,4 +1,4 @@
-FROM debian:buster AS wordpress_installation
+FROM debian:bullseye AS wordpress_installation
 
 RUN apt-get update -y \
 &&	apt-get install -y \
@@ -27,7 +27,7 @@ RUN mkdir -p /var/www/html/wordpress \
 FROM wordpress_archive AS wordpress_import_files
 
 COPY ./tools/wpscript.sh ./wpscript.sh
-COPY ./conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
 FROM wordpress_import_files
 

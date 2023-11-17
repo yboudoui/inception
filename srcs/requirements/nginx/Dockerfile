@@ -1,4 +1,4 @@
-FROM debian:buster AS nginx_installation
+FROM debian:bullseye AS nginx_installation
 
 RUN apt-get update -y \
 && apt-get -y install \
