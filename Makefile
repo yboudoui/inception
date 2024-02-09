@@ -15,7 +15,7 @@ CMD_DOCKER_COMPOSE_FILE		=	$(CMD_DOCKER_COMPOSE) -f $(COMPOSE_FILE)
 all: build up
 
 build:
-	sudo mkdir -p $(DIRS)
+	mkdir -p $(DIRS)
 	$(CMD_DOCKER_COMPOSE_FILE) build
 
 up:
@@ -25,6 +25,13 @@ down:
 	$(CMD_DOCKER_COMPOSE_FILE) down
 
 clean: down
-	@sudo rm -rf $(DIRS)
+	@rm -rf $(DATA_DIR)
 
-.PHONY: build up down clean
+fclean: clean
+	@docker stop $$(docker ps -qa);\
+	docker rm $$(docker ps -qa);\
+	docker rmi -f $$(docker images -qa);\
+	docker volume rm $$(docker volume ls -q);
+	#docker network rm srcs_docker_network
+
+.PHONY: build up down clean fclean

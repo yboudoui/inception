@@ -1,24 +1,20 @@
 #!/bin/bash
-set -eux
 
-LOCAL_PATH=/var/www/html/wordpress
-#LOCAL_PATH=/var/www/wordpress
-cd $LOCAL_PATH
+sleep 20
+cd /var/www/html/wordpress
 
-if [ ! -f wp-config.php ]; then
+
+if wp core is-installed --allow-root; then
+	echo "Wordpress is allready installed"
+else
+wp core download	--allow-root;
+
 wp config create	--allow-root \
-			--path=$LOCAL_PATH \
 			--dbname=${MYSQL_DATABASE} \
 			--dbuser=${MYSQL_USER} \
 			--dbpass=${MYSQL_PASSWORD} \
 			--dbhost=${MYSQL_HOST} \
 			--url=https://${DOMAIN_NAME};
-fi
-
-if ! wp core is-installed --allow-root;
-then
-
-wp core download	--allow-root;
 
 wp core install		--allow-root \
 			--url=https://${DOMAIN_NAME} \
@@ -28,12 +24,18 @@ wp core install		--allow-root \
 			--admin_email=${ADMIN_EMAIL};
 
 wp user create		--allow-root \
-			${USER1_LOGIN} ${USER1_MAIL} \
+			${USER_LOGIN} ${USER_MAIL} \
 			--role=author \
-			--user_pass=${USER1_PASS} ;
+			--user_pass=${USER_PASS} ;
 
-wp cache flush --allow-root;
+wp cache flush		--allow-root;
 
+
+# remove default themes and plugins
+wp plugin delete hello --allow-root
+
+wp theme install twentytwentytwo --allow-root
+wp theme activate twentytwentytwo --allow-root
 
 # set the site language to English
 wp language core install en_US --allow-root --activate;
@@ -47,5 +49,5 @@ if [ ! -d /run/php ]; then
 	mkdir /run/php;
 fi
 
-# start the PHP FastCGI Process Manager (FPM) for PHP version 7.3 in the foreground
-exec /usr/sbin/php-fpm7.3 -F -R
+# start the PHP FastCGI Process Manager (FPM) for PHP version 7.4 in the foreground
+exec /usr/sbin/php-fpm7.4 -F -R

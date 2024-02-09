@@ -1,34 +1,49 @@
 version: '3.8'
 services:
-
   mariadb:
     container_name: mariadb
     build: requirements/mariadb
     image: mariadb:inception
-    env_file: .env
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    expose:
+      - "3306"
     volumes:
-      - /home/${MYSQL_USER}/data/mysql:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
     networks:
       - docker_network
-    restart: always
+    healthcheck:
+      test: mysqladmin ping --host=localhost -p${MYSQL_ROOT_PASSWORD}
+      interval: 5s
+      timeout: 1s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
 
   wordpress:
     container_name: wordpress
     build: requirements/wordpress
     image: wordpress:inception
     env_file: .env
-    depends_on: 
-      - mariadb
+    expose:
+      - "9000"
     networks:
       - docker_network
     volumes:
-      - /home/${MYSQL_USER}/data/wordpress:/var/www/html/wordpress
-    restart: always
+      - wordpress_data:/var/www/html
+    depends_on:
+      mariadb:
+        condition: service_healthy 
+    restart: unless-stopped
 
   nginx:
     container_name: nginx
     build: requirements/nginx
     image: nginx:inception
+    env_file: .env
     depends_on :
       - wordpress
     networks:
@@ -36,8 +51,29 @@ services:
     ports:
       - "443:443"
     volumes:
-      - /home/${MYSQL_USER}/data/wordpress:/var/www/html/wordpress
-    restart: always
+      - wordpress_data:/var/www/html
+    healthcheck:
+      test: 'curl -kfsSL https://localhost:443/status'
+      interval: 5s
+      timeout: 1s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: "/home/${MYSQL_USER}/data/mysql"
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: "/home/${MYSQL_USER}/data/wordpress"
 
 networks:
   docker_network:
+    driver: bridge
+
