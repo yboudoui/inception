@@ -2,7 +2,7 @@
 
 
 env variable
-
+```sh
 DOMAIN_NAME=
 
 MYSQL_HOST=
@@ -20,5 +20,5 @@ ADMIN_EMAIL=
 USER_LOGIN=
 USER_MAIL=
 USER_PASS=
-
+```
 
